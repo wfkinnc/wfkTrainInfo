@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"> 
+<title>The Train Tracker</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+<style>
+    
+    table{
+      color: rgb(7, 56, 66);
+    }
+    .jumbotron-fluid{
+    text-align: center;
+    background-color: rgb(0, 0, 0);
+    }
+    .color-class{
+    text-align: center;
+    background-color: rgba(7, 56, 66, .9);
+    color: rgb(255,255,255);
+    }
+    #train-img{
+    height: 150px;
+    padding-left: 20px;
+    }
+    .media{
+    }
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> 
+
+<!-- for the firebase connection -->
+<script src="https://www.gstatic.com/firebasejs/4.5.0/firebase.js"></script>
+<script>
+
+  $(document).ready(function(){
+
+
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyDPW3uhHtuARN6nM_1QxSy6_BuZZadEX7o",
+    authDomain: "wfktrainschedule.firebaseapp.com",
+    databaseURL: "https://wfktrainschedule.firebaseio.com",
+    projectId: "wfktrainschedule",
+    storageBucket: "wfktrainschedule.appspot.com",
+    messagingSenderId: "577396541999"
+  };
+  firebase.initializeApp(config);
+
+
+// Create a variable to reference the database.
+var database = firebase.database();
+
+        // Initial Values
+        var trainName       = "";
+        var trainDest       = "";
+        var trainFirstTime  ="";
+        var trainFreq       = 0;
+
+  $("button").on("click",function(event){
+    //------------------------------------------
+    // Will add data to the firebase instance. 
+    //------------------------------------------
+    event.preventDefault();
+    alert("xx");
+
+    trainName       = $("#train-name-input").val().trim();
+    trainDest       = $("#train-destination-input").val().trim();
+    trainFirstTime  = $("#train-first-time-input").val().trim();
+    trainFreq       = $("#train-frequency-input").val().trim();
+
+    // Code for handling the push
+    database.ref().push({
+      name: trainName,
+      dest: trainDest,
+      firstTime: trainFirstTime,
+      freq: trainFreq,
+      dateAdded: firebase.database.ServerValue.TIMESTAMP
+    });
+
+  })//end onclick on btn
+
+
+//capturing the data at page load..adn when the data is changed.
+//database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot) {
+  database.ref().orderByChild("dateAdded").on("child_added", function(snapshot) {
+    // storing the snapshot.val() in a variable for convenience
+    var sv = snapshot.val();
+
+    // Console.loging the last user's data
+    console.log(sv.name);
+    console.log(sv.dest);
+    console.log(sv.firstTime);
+    console.log(sv.freq);
+    console.log(sv.dateAdded);
+
+    { // load the table values
+    var rowDisplay =$("<tr><td>"+sv.name+"</td><td>"+sv.dest+"</td><td>"+sv.firstTime+"</td></tr>"+sv.freq+"</td></tr>");
+    console.log(rowDisplay);
+    $('tbody:last').append(rowDisplay);
+    }
+
+    // Handle the errors
+}, function(errorObject) {
+    console.log("Errors handled: " + errorObject.code);
+  });
+
+})// end doument read
+</script>
+
+
+</head>
+<body>
+<div class="container-fluid">
+
+	<div class="media">
+	  <img class="d-flex mr-3" src="assets/images/train_1.png" alt="Generic placeholder image" id="train-img">
+	  <div class="media-body color-class">
+			    <h1 class="mt-0">The Train Tracker</h1>
+			    <p class="lead">Easily find the next train arrival as well as enter information on trains you want to track.</p>
+	
+	
+	  </div>
+	</div>
+
+
+	<div class="row" id="mid-row">
+	<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Train Name</th>
+      <th>Destination</th>
+      <th>Frequency (Min)</th>
+      <th>Next Arrival</th>
+      <th>Minutes</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+	</div>
+	
+	<div class="row" id="bot-row">
+	
+</div>
+
+<div class="card color-class" style="width: 20rem;">
+    <div class="card-body">
+      <h4 class="card-title">Add Trains</h4>
+      <p class="card-text">Basic Information about trains may be added here.</p>
+      <form>
+          <div class="form-group">
+            <label class="form-control-label" for="train-name-input">Train Time</label>
+            <input type="text" class="form-control" id="train-name-input" placeholder="Train Name">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label" for="train-destination-input">Destination</label>
+            <input type="text" class="form-control" id="train-destination-input" placeholder="Destination">
+          </div>
+          <div class="form-group">
+            <label class="form-control-label" for="train-first-time-input">First Train Time (HH:mm)</label>
+            <input type="time" class="form-control" id="train-first-time-input" placeholder="First Train Time (HH:mm Military)">
+          </div>
+          <div class="form-group">
+              <label class="form-control-label" for="train-frequency-input">Frequency</label>
+              <input type="text" class="form-control" id="train-frequency-input" placeholder="Frequency (Minutes)">
+            </div>
+        
+            <button type="button" class="btn btn-primary" id="btnSubmti">Add Train</button>  
+          </form>
+          </div>
+
+
+
+    </div>
+    <div class="card-footer text-muted color-class">
+        The Train Tracker
+      </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+</body>
+</html>
+
+<!--
+    <h5 class="mt-0">Media heading</h5>
+    Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+
+<div class="container-fluid">
+	<div class="row" id="top-row">
+		<div class="jumbotron-fluid">
+		  <div class="container-fluid">
+		    <h1 class="display-3">The Train Schedule</h1>
+		    <p class="lead">Easily find the next train arrival as well as enter information on trains you want to track (get it..train...track..haha!!)</p>
+		  </div>
+	</div>
+	</div>
+-->	
